@@ -1,0 +1,189 @@
+__author__ = 'dell'
+#encoding=utf-8
+
+import requests
+import json
+import sys
+import hashlib
+
+# 习题2：
+requests get方法
+url_get = "http://XXXXX/5005/14809"
+params = {"Content-Type":"application/json","charset":"utf-8","accept":"application/json"}
+respone_test_get = requests.request(method = 'get',
+                                url = url_get,
+                                params = params
+                                )
+
+print("respone_test_get type:" + str(type(respone_test_get)))
+print("respone_test_get.status_code:" + str(respone_test_get.status_code))
+print("respone_test_get.text:" + respone_test_get.text)
+
+requests post方法
+url_post = "http://XXXXbcode/make"
+headers = {"Content-Type":"application/json",
+           "charset":"utf-8",
+           "accept":"application/json",
+           "orgname":"XXXX",
+           "username":"sittest001",
+           "tenantId":"XXXX"}
+data = {"begin":"2019-12-27 00:00:00",
+        "end":"2020-11-30 00:00:00",
+        "codeCount":1,
+        "codeDesc":"生成1个",
+        "deliveryId":190903001844,
+        "couponId":193621853,
+        "couponName":"XXXX",
+        "couponStatus":1,
+        "total":100000,
+        "materialType":2,
+        "channelCode":"1028",
+        "orgName":"XXXX",
+        "username":"sittest001",
+        "tenantId":"XXXX"
+        }
+# print(type(json.dumps(data)))
+
+respone_test_post = requests.request(method = 'post',
+                                     url = url_post,
+                                     headers = headers,
+                                     data = json.dumps(data))
+
+print("respone_test_post type" + str(type(respone_test_post)))
+print("respone_test_post.status_code:" + str(respone_test_post.status_code))
+print("respone_test_post.text:" + respone_test_post.text)
+
+
+# 习题3；
+print(len(sys.argv))
+if len(sys.argv)!=2:
+    url_post = "http://XXXXX/bcode/make"
+else:
+    url_post_pre = sys.argv[1]
+    print(url_post_pre)
+    url_post = url_post_pre+'/bcode/make'
+    print(url_post)
+headers = {"Content-Type":"application/json",
+           "charset":"utf-8",
+           "accept":"application/json",
+           "orgname":"XXXXX",
+           "username":"sittest001",
+           "tenantId":"XXXX"}
+data = {"begin":"2019-12-27 00:00:00",
+        "end":"2020-11-30 00:00:00",
+        "codeCount":1,
+        "codeDesc":"XXX",
+        "deliveryId":XXX,
+        "couponId":XXX,
+        "couponName":"XXX",
+        "couponStatus":1,
+        "total":100000,
+        "materialType":2,
+        "channelCode":"1028",
+        "orgName":"XXXX",
+        "username":"XXXX",
+        "tenantId":"XXXX"
+        }
+# print(type(json.dumps(data)))
+respone_test_post = requests.request(method = 'post',
+                                     url = url_post,
+                                     headers = headers,
+                                     data = json.dumps(data))
+
+print("respone_test_post type" + str(type(respone_test_post)))
+print("respone_test_post.status_code:" + str(respone_test_post.status_code))
+print("respone_test_post.text:" + respone_test_post.text)
+
+
+# 习题4（下载二进制流文件）：
+download = 'D:\PythonCode\AutoTest1\download.xls'
+url_flie = 'http://XXXX'
+headers_file = {"tenantId":"XXXX","token":"XXXX",
+                "userid":"XXXX","workingOrgCode":"XXX"}
+respose_file = requests.request(method = 'get',
+                                url = url_flie,
+                                headers = headers_file,
+                                stream = True)
+print(respose_file.content)
+print(respose_file.iter_content)
+print(respose_file.raw)
+# print(type(respose_file))
+print(respose_file.status_code)
+# print(respose_file.text)
+if respose_file.status_code == 200:
+    # total_size = int(respose_file.headers['Content-Length'])
+    # Content-Length当前会报错，未返回Content-Length
+    # print("respose_file.headers"+str(respose_file.headers))
+    # print('-----最外面的if------')
+    with open(download, 'wb') as fd:
+        for chunk in respose_file.iter_content(chunk_size = 1024):
+            # print('----for----')
+            if chunk:
+                fd.write(chunk)
+                # print('----最里面的if-----')
+
+
+# 习题5（requests完成2个保持在同一个会话中的请求）：
+
+# 登录接口：
+url = 'http://XXXX'
+header_s = {"Content-Type":"XXXX","token":"XXXX"}
+
+'''MD5加密'''
+password_mingwen = '11111111'
+# 创建MD5对象
+md5_object = hashlib.md5()
+#encode为bytes
+# md5_object_b = password_mingwen.encode(encoding='utf-8')
+md5_object.update(password_mingwen.encode(encoding='utf-8'))
+# 返回摘要，作为十六进制数据字符串值
+password = md5_object.hexdigest()
+
+data_post = {"userName":"XXXX",
+             "password":password,
+             "channel":0,
+             "type":0,
+             "tenantId":XXXX}
+s = requests.session()
+reponse = s.post(url = url,
+                 data= json.dumps(data_post),
+                 headers = header_s)
+
+print('http状态吗：'+str(reponse.status_code))
+print(type(reponse.text))
+print(reponse.text)
+print(type(json.loads(reponse.text)))
+print(json.loads(reponse.text))
+reponse_dict = json.loads(reponse.text)
+print('接口返回状态码：'+str(reponse_dict['status']))
+#
+# # 获取登录信息，请求
+
+download = 'D:\PythonCode\AutoTest1\download.xls'
+url_flie = 'http://XXXX'
+headers_file = {"tenantId":"XXX"}
+respose_file = s.get(url = url_flie,
+                     headers = headers_file,
+                     stream = True)
+print(respose_file.content)
+print(respose_file.iter_content)
+print(respose_file.raw)
+# print(type(respose_file))
+print(respose_file.status_code)
+# print(respose_file.text)
+if respose_file.status_code == 200:
+    # total_size = int(respose_file.headers['Content-Length'])
+    # Content-Length当前会报错，未返回Content-Length
+    # print("respose_file.headers"+str(respose_file.headers))
+    # print('-----最外面的if------')
+    with open(download, 'wb') as fd:
+        for chunk in respose_file.iter_content(chunk_size = 1024):
+            # print('----for----')
+            if chunk:
+                # print('----最里面的if-----')
+
+
+
+
+
+
